@@ -1,44 +1,24 @@
+require('dotenv').config();
 const express = require('express');
+const { default: mongoose } = require('mongoose');
+
+const PORT = process.env.PORT;
+const DB_URI = process.env.MONGODB_URI;
 
 const app = express();
 
-const PORT = 6030;
-
-const DB = [];
+const Router = require('./routes/booksRoute');
 
 app.use(express.json());
 
-app.post('/api/books', (req, res) => {
+app.use('/api', Router);
 
-  const { title, author, description } = req.body;
-
-  if (!title || !author || !description)
-  return res.status(400).json({msg : `feild can't be empty`});
-
-  const newBook = {
-    id: DB.length + 1,
-    title, 
-    author, 
-    description
-  };
-
-  DB.push(newBook);
-  return res.status(200).json({
-    msg : `book created successfully`, 
-    bookDetails : newBook
-  });
-});
-
-app.get('/api/books', (req, res) => {
-
-  // res.json(DB);
-  return res.status(200).json({
-    msg : `book fetched successfully`, 
-    bookDetails : DB
-  });
-
-});
-
-app.listen(PORT, () => {
-  console.log(`server is running on http://localhost:${PORT}`);
+mongoose.connect(DB_URI)
+.then(() => {
+  app.listen(PORT, () => {
+    console.log("connect to database");
+    console.log(`server is running on http://127.1.1.0${PORT}`)
+  })
 })
+.catch((err) => console.log('can not connect to db', err)
+)
